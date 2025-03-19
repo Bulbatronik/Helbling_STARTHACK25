@@ -33,23 +33,26 @@ def transcribe_whisper(audio_recording):
     transcription = client.audio.transcriptions.create(
         model="whisper-1",
         file=audio_file,
-        #language = ""  # specify Language explicitly
+        # Set english as the language for the transcription
+        language="en", # specify Language explicitly
     )
     print(f"openai transcription: {transcription.text}")
     return transcription.text
     
-# def transcribe_preview(session):
-#     if session["audio_buffer"] is not None:
-#         text = transcribe_whisper(session["audio_buffer"])
-#         # send transcription
-#         ws = session.get("websocket")
-#         if ws:
-#             message = {
-#                 "event": "recognizing",
-#                 "text": text,
-#                 "language": session["language"]
-#             }
-#             ws.send(json.dumps(message))
+def transcribe_preview(session):
+    if session["audio_buffer"] is not None:
+        text = transcribe_whisper(session["audio_buffer"])
+        # send transcription
+        ws = session.get("websocket")
+        if ws:
+            message = {
+                "event": "recognizing",
+                "text": text,
+                "language": session["language"]
+            }
+            ws.send(json.dumps(message))
+
+
 
 @app.route("/chats/<chat_session_id>/sessions", methods=["POST"])
 def open_session(chat_session_id):
@@ -165,6 +168,7 @@ def upload_audio_chunk(chat_session_id, session_id):
         sessions[session_id]["audio_buffer"] = audio_data
 
     # TODO optionally transcribe real time audio chunks, see transcribe_preview()
+    
 
     return jsonify({"status": "audio_chunk_received"})
 

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Speech-to-Text</title>
+    <style>
+        body { font-family: sans-serif; }
+        #log { border: 1px solid #ccc; height: 200px; overflow-y: scroll; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Speech-to-Text Interface</h1>
+    <label for="chatSessionId">Chat Session ID:</label>
+    <input type="text" id="chatSessionId" value="my-chat-123"><br><br>
+    <label for="language">Language:</label>
+    <input type="text" id="language" value="en-US"><br><br>
+    <button id="startSession">Start Session</button>
+    <button id="closeSession" disabled>Close Session</button><br><br>
+    <input type="file" id="audioFile" accept=".wav"><br><br>
+    <button id="sendAudio" disabled>Send Audio</button><br><br>
+    <div id="log"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
