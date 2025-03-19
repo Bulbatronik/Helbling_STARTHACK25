@@ -11,9 +11,13 @@ from flasgger import Swagger
 from openai import OpenAI
 import io
 
-AZURE_SPEECH_KEY = "See https://starthack.eu/#/case-details?id=21, Case Description"
-AZURE_SPEECH_REGION = "switzerlandnorth"
-OPENAI_KEY = "See https://starthack.eu/#/case-details?id=21, Case Description"
+from utils import load_api_keys
+
+
+KEYS = load_api_keys()
+AZURE_SPEECH_KEY = KEYS['azure-speech1']
+AZURE_SPEECH_REGION = KEYS['azure-speech-region']
+OPENAI_KEY = KEYS['openai']
 client = OpenAI(api_key=OPENAI_KEY)
 
 app = Flask(__name__)

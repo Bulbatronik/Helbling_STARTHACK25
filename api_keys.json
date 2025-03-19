@@ -1,0 +1,8 @@
+{
+  "api_keys": {
+    "openai": "sk-proj-gCQDRtwQ7chS_4w6Su-m6hPI2eanCSOnI3LpszgKdBh4_Sk7jr9qE_tfqSjeYVU7k32SDidkfT3BIbkFJKO1MtLeeWKJtE9_eUlJMCvSpCODy57QJ84y38zalXZ5shHxe7skG1DezOx3xLCY29nyqeFf8wA",
+    "azure-speech1": "BJ953og5dx7zhJDZayAhkShitCd8qHjlGTb0oimuxHsRJ5IdiL2IJQQJ99BCACI8hq2XJ3w3AAAYACOGYWuO",
+    "azure-speech2": "9VQ8cJX1OfJoSTwAIq4BzmAFdOs0cRLCax7XEz2FoIP85Gz4wTB6JQQJ99BCACI8hq2XJ3w3AAAYACOG4htO",
+    "azure-speech-region": "switzerlandnorth"
+  }
+} 

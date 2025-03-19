@@ -1,6 +1,9 @@
 import requests
 
-API_KEY = "See https://starthack.eu/#/case-details?id=21, Case Description"
+from utils import load_api_keys
+
+KEYS = load_api_keys()
+API_KEY = KEYS['openai']
 URL = "https://api.openai.com/v1/chat/completions"
 
 headers = {
