@@ -4,6 +4,10 @@ const startSessionButton = document.getElementById('startSession');
 const closeSessionButton = document.getElementById('closeSession');
 const audioFileInput = document.getElementById('audioFile');
 const sendAudioButton = document.getElementById('sendAudio');
+const recordButton = document.getElementById("recordAudio");
+const stopButton = document.getElementById("stopRecording");
+const sendRecordedButton = document.getElementById("sendRecordedAudio");
+const audioPlayback = document.getElementById("audioPlayback");
 const logDiv = document.getElementById('log');
 
 let sessionId = null;
@@ -94,3 +98,63 @@ sendAudioButton.addEventListener('click', async () => {
         logMessage(`Error sending audio: ${error.message}`);
     }
 });
+
+let mediaRecorder;
+let audioChunks = [];
+
+
+// Request microphone access
+recordButton.addEventListener("click", async () => {
+    let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = event => {
+        audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        audioPlayback.src = audioUrl;
+
+        sendRecordedButton.disabled = false;
+    };
+
+    mediaRecorder.start();
+    recordButton.disabled = true;
+    stopButton.disabled = false;
+});
+
+// Stop recording
+stopButton.addEventListener("click", async () => {
+    mediaRecorder.stop();
+    recordButton.disabled = false;
+    stopButton.disabled = true;
+});
+
+// Send recorded audio for processing
+sendRecordedButton.addEventListener("click", async () => {
+    const chatSessionId = document.getElementById("chatSessionId").value;
+
+    if (!audioChunks.length) {
+        logMessage("No recorded audio available.");
+        return;
+    }
+
+    const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+    const file = new File([audioBlob], "recorded_audio.wav", { type: "audio/wav" });
+
+    try {
+        await fetch(`http://localhost:5000/chats/${chatSessionId}/sessions/${sessionId}/wav`, {
+            method: "POST",
+            body: file,
+        });
+
+        logMessage("Recorded audio sent.");
+    } catch (error) {
+        logMessage(`Error sending recorded audio: ${error.message}`);
+    }
+});
+
