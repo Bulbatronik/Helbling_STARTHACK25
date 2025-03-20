@@ -13,10 +13,11 @@ const logDiv = document.getElementById('log');
 let sessionId = null;
 let websocket = null;
 
-function logMessage(message) {
+ function logMessage(message) {
+    logDiv.innerText = '';  // Clears all text inside logDiv
     logDiv.innerHTML += `<p>${message}</p>`;
     logDiv.scrollTop = logDiv.scrollHeight; // Auto-scroll to bottom
-}
+ }
 
 startSessionButton.addEventListener('click', async () => {
     const chatSessionId = chatSessionIdInput.value;
@@ -32,21 +33,23 @@ startSessionButton.addEventListener('click', async () => {
         const data = await response.json();
         sessionId = data.session_id;
 
-        websocket = new WebSocket(`ws://localhost:5000/ws/chats/${chatSessionId}/sessions/${sessionId}`);
+        websocket = new WebSocket(`ws://localhost:5000/ws/chats/${chatSessionId}/sessions/${sessionId}`);        
 
         websocket.onmessage = (event) => {
             const message = JSON.parse(event.data);
             if (message.event === 'recognizing') {
-                logMessage(`Recognizing: ${message.text}`);
+                logMessage(message.text);
+                //logMessage(`Recognizing: ${message.text}`);
             } else if (message.event === 'recognized') {
-                logMessage(`Final Transcription: ${message.text}`);
+                logMessage(message.text);
+                //logMessage(`Final Transcription: ${message.text}`);
             } else if (message.error) {
                 logMessage(`Error: ${message.error}`);
             }
         };
 
         websocket.onopen = () => {
-            logMessage('WebSocket connected.');
+            logMessage('WebSocket connected.\n');
             startSessionButton.disabled = true;
             closeSessionButton.disabled = false;
             sendAudioButton.disabled = false;
@@ -101,17 +104,44 @@ sendAudioButton.addEventListener('click', async () => {
 
 let mediaRecorder;
 let audioChunks = [];
+let processingInterval;
 
-
-// Request microphone access
 recordButton.addEventListener("click", async () => {
     let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const chatSessionId = document.getElementById("chatSessionId").value;
 
     mediaRecorder = new MediaRecorder(stream);
     audioChunks = [];
+    let isSending = false; // Track if the previous fetch request is still ongoing
 
-    mediaRecorder.ondataavailable = event => {
+    mediaRecorder.ondataavailable = async event => {
         audioChunks.push(event.data);
+    
+        // Check if there are more than 2 chunks and if the previous request is finished
+        if (audioChunks.length > 2 && !isSending) {
+            isSending = true;  // Mark that a request is being sent
+    
+            // Get the oldest two chunks
+            let lastTwoChunks = audioChunks.slice(0, 2);
+            audioChunks.splice(0, 2); // Remove the sent chunks
+            let audioBlob = new Blob(lastTwoChunks, { type: "audio/wav" });
+            let file_name = `recorded_audio_${Date.now()}.wav`;
+            let file = new File([audioBlob], file_name, { type: "audio/wav" });
+    
+            try {
+                // Send the audio file using fetch
+                await fetch(`http://localhost:5000/chats/${chatSessionId}/sessions/${sessionId}/wav`, {
+                    method: "POST",
+                    body: file,
+                });
+    
+                //logMessage("Recorded audio sent.");
+            } catch (error) {
+                logMessage(`Error sending recorded audio: ${error.message}`);
+            }
+    
+            isSending = false;  // Mark that the request is complete
+        }
     };
 
     mediaRecorder.onstop = async () => {
@@ -122,7 +152,7 @@ recordButton.addEventListener("click", async () => {
         sendRecordedButton.disabled = false;
     };
 
-    mediaRecorder.start();
+    mediaRecorder.start(500);
     recordButton.disabled = true;
     stopButton.disabled = false;
 });
@@ -157,4 +187,3 @@ sendRecordedButton.addEventListener("click", async () => {
         logMessage(`Error sending recorded audio: ${error.message}`);
     }
 });
-

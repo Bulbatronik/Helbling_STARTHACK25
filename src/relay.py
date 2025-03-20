@@ -169,6 +169,7 @@ def upload_audio_chunk(chat_session_id, session_id):
 
     # TODO optionally transcribe real time audio chunks, see transcribe_preview()
     
+    transcribe_preview(sessions[session_id])
 
     return jsonify({"status": "audio_chunk_received"})
 
