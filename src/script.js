@@ -32,8 +32,10 @@ startSessionButton.addEventListener('click', async () => {
 
         websocket.onmessage = (event) => {
             const message = JSON.parse(event.data);
-            if (message.event === 'recognizing' || message.event === 'recognized') {
-                logMessage(`Transcription: ${message.text}`);
+            if (message.event === 'recognizing') {
+                logMessage(`Recognizing: ${message.text}`);
+            } else if (message.event === 'recognized') {
+                logMessage(`Final Transcription: ${message.text}`);
             } else if (message.error) {
                 logMessage(`Error: ${message.error}`);
             }
@@ -82,9 +84,6 @@ sendAudioButton.addEventListener('click', async () => {
     }
 
     try {
-        const formData = new FormData();
-        formData.append('audio', file);
-
         await fetch(`http://localhost:5000/chats/${chatSessionId}/sessions/${sessionId}/wav`, {
             method: 'POST',
             body: file,
